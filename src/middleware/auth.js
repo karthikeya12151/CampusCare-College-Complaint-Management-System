@@ -1,0 +1,3 @@
+const jwt=require('jsonwebtoken'),User=require('../models/User');
+async function auth(req,res,next){try{const h=req.headers.authorization||'',t=h.startsWith('Bearer ')?h.slice(7):null;if(!t)return res.status(401).json({message:'Please sign in.'});const p=jwt.verify(t,process.env.JWT_SECRET||'dev_secret_change_me');req.user=await User.findById(p.id).select('-passwordHash');if(!req.user)return res.status(401).json({message:'Account not found.'});next()}catch(e){res.status(401).json({message:'Session expired. Please sign in again.'})}}
+function admin(req,res,next){if(req.user?.role!=='admin')return res.status(403).json({message:'Administrator access required.'});next()}module.exports={auth,admin};
